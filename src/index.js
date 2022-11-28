@@ -1,9 +1,10 @@
-// import {express} from ("express" )
 
 const express = require('express')
 const mongoose = require('mongoose')
 const routes = require('./route/route')
 const app = express()
+
+app.use(express.json())
 
 mongoose.connect("mongodb+srv://bloggingSite:project123@project-01-group-3.2zpxn0w.mongodb.net/Project-03-Books-Management-Systems",{
     useNewUrlParser:true

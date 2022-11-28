@@ -1,18 +1,21 @@
-// const bookModel = require("../models/booksModel")
+const bookModel = require("../models/booksModel")
 // const reviewModel = require("../model/reviewModel")
 
-// const createBook = async (req, res) => {
-//     try {
-//         let data = req.body
+const createBook = async (req, res) => {
+    try {
+        const {title , ISBN} = req.body
+        const checkEmail=await bookModel.findOne({title:title})
+        if(checkEmail) return res.status(400).send({msg :"Title Already Exist !"})
 
-       
+        const checkEMobile=await bookModel.findOne({ISBN:ISBN})
+        if(checkEMobile) return res.status(400).send({msg :"ISBN Should be Unique !"})
 
-//         let result = await bookModel.create(data)
-//         res.status(201).send({ status: true, message: 'Success', data: result })
-//     } catch (err) {
-//         res.status(500).send({ status: false, message: err.message })
-//     }
-// }
+        const result = await bookModel.create(req.body)
+        res.status(201).send({ status: true, message: 'Success', data: result })
+    } catch (err) {
+        res.status(500).send({ status: false, message: err.message })
+    }
+}
 
 // const getBook = async (req, res) => {
 //     try {
@@ -63,4 +66,4 @@
 //         res.status(500).send({ status: false, message: err.message })
 //     }
 // }
-// module.exports = { createBook, getBook, getBookById, updateBook, deleteBook }
+module.exports = { createBook}

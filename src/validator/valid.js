@@ -3,7 +3,7 @@ const {isValidObjectId} = require("mongoose")
 // validation for name 
 
 const isValidName =function(name){
-    const  nameRegex =/^[a-zA-Z]{2,30}$/
+    const  nameRegex =/^[a-zA-Z( \)]{2,50}$/
     return nameRegex.test(name)
 }
 
@@ -31,7 +31,7 @@ const isValidEmail = function(email){
 
 
 const isValidPass= (value)=>{
-    const passRegex = /^[a-zA-Z0-9@$_]$/ 
+    const passRegex = /^[a-zA-Z0-9@$]*$/
     return passRegex.test(value)
 }
 

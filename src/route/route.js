@@ -5,11 +5,11 @@ const bookController = require("../controller/bookController")
 const reviewController = require("../controller/reviewController")
 const middleware = require('../middleWare/auth')
 
-router.post("/register", userController.createUser)
+router.post("/register",middleware.userCreateValidation , userController.createUser)
 
 router.post("/login", userController.userLogin)
 
-// router.post("/books", bookController.createBook)
+router.post("/books",middleware.bookCreateValidation,middleware.authentication ,  bookController.createBook)
 
 // router.get("/books",middleware.authentication, bookController.getBook)
 
