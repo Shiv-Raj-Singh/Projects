@@ -11,13 +11,13 @@ router.post("/login", userController.userLogin)
 
 router.post("/books",middleware.bookCreateValidation,middleware.authentication ,  bookController.createBook)
 
-// router.get("/books",middleware.authentication, bookController.getBook)
+router.get("/books",middleware.authentication , bookController.getBook)
 
-// router.get("/books/:bookId", bookController.getBookById)
+router.get("/book/:bookId",middleware.authentication , bookController.getBookById)
 
-// router.put("/books/:bookId", bookController.updateBook)
+router.put("/book/:bookId",middleware.authentication , middleware.autherisation , bookController.updateBook)
 
-// router.delete("/books/:bookId", bookController.deleteBook)
+router.delete("/book/:bookId",middleware.authentication , middleware.autherisation , bookController.deleteBook)
 
 // router.post("/books/:bookId/review", reviewController.createReview )
 

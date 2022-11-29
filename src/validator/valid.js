@@ -52,14 +52,19 @@ const isBoolean = function(value){
 
 const isValid = function(value){
     if(typeof value ==='undefined' || value ===null)  return false
-    if(typeof value ==='string' && value.trim().length ===0)return false
+    if(typeof value ==='string' && value.trim().length < 1)return false
     return true
 }
        
 // Each Field has to Valid Means String and Number only not special Charactors
 const isValidBookTitle = function(title){
-    const bTitleregex = /^[A-Za-z0-9 ]+$/
+    const bTitleregex = /^[A-Za-z0-9( \)]+$/
     return bTitleregex.test(title)
 }
+function checkDate(str) {     // 2022 - 11 - 29
+    var re = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/ 
+    return re.test(str);
+}
 
-module.exports = { isValidName, isValidTitle,isValidPhone, isValidEmail,isValidPass, isValidObjectIds, isBoolean, isValid ,isValidBookTitle}
+
+module.exports = { isValidName, isValidTitle,isValidPhone, isValidEmail,isValidPass, isValidObjectIds, isBoolean, isValid ,isValidBookTitle , checkDate}
