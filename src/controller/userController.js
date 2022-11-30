@@ -48,7 +48,7 @@ try {
     if(userData.password !== password){
         return res.status(404).send({status:false , message : 'Incorrect Password !'})
     } 
-    const token = jwt.sign({ userId: userData._id }, "book management", {expiresIn:"1h"})
+    const token = jwt.sign({ userId: userData._id }, "book management", {expiresIn:"24h"})
     const {iat , exp} = jwt.verify(token , "book management")
 
     return res.status(200).send({ status: true, message: 'Success', data: token , iat : iat , exp : exp })

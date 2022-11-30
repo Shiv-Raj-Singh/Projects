@@ -1,4 +1,5 @@
 const bookModel = require("../models/booksModel")
+const reviewModel = require('../models/reviewModel')
 const {isValid , isValidObjectIds ,checkDate , isValidBookTitle } = require("../validator/valid")
 const moment = require('moment')
 
@@ -9,6 +10,7 @@ const createBook = async (req, res) => {
             return res.status(401).send({ status: false, message: "Not Authorized to Create Book!" })  
         }
         const checkTitle =await bookModel.findOne({title:title})
+
         if(checkTitle){
             return res.status(400).send({status: false, message :"Title Already Exist !"})
         } 
@@ -41,8 +43,7 @@ const getBook = async (req, res) => {
         if(userId){
              if (!isValidObjectIds(userId)) {
                 return res.status(400).send({status :false , msg: "Enter Valid User-Id !" }) 
-            }}
-        
+            }}        
     const getAllBooks = await bookModel.find(req.query).select(
         { ISBN: 0, subcategory: 0, deletedAt: 0, isDeleted: 0, createdAt: 0, updatedAt: 0, __v:0 }).sort({title:1})                          
         
@@ -60,7 +61,19 @@ const getBook = async (req, res) => {
 const getBookById = async (req, res) => {
     try {
         const bookId = req.params.bookId;
-        const bookData = await bookModel.findOne({_id : bookId ,isDeleted: false  })
+
+        if (!isValid(bookId)) {
+            return res.status(400).send({ status: false, message: "Enter book Id" })
+        }
+        if (!isValidObjectIds(bookId)) {
+            return res.status(400).send({ status: false, message: "Enter Valid book Id" })
+        }
+        const bookData = await bookModel.findOne({_id : bookId ,isDeleted: false  }).lean().select(
+            { ISBN: 0, subcategory: 0, deletedAt: 0, isDeleted: 0, createdAt: 0, updatedAt: 0, __v:0 }).sort({title:1}) 
+        const reviewsData = await reviewModel.find({ bookId: bookId, isDeleted: false }).select(
+            { isDeleted: 0, createdAt: 0, updatedAt: 0, __v:0 }).sort({ratting:1}) 
+        bookData.reviewsData = reviewsData
+
         if(bookData) {
            return res.status(200).send({ status: true, message: 'Success', data: bookData })
         }
@@ -80,20 +93,25 @@ const updateBook = async (req, res) => {
         } 
         const bookId = req.params.bookId;
         const {title , excerpt ,ISBN , releasedAt } = req.body;
-
+        const updateObj = {}
+        
         if(excerpt){
             if (!isValidName(excerpt)) {
-                return res.status(400).send({status : false , message: "Enter a Valid excerpt !" })
-            } 
+                return res.status(400).send({status : false , message: "Enter a Valid excerpt !" })   } 
+        updateObj.excerpt = excerpt
         }
-        if(title) {
+        if(title){
+            if(!isValid(title)){
+                return res.status(400).send({ status : false , message: "Enter A title ! " }) 
+            }   
             if (!isValidBookTitle(title)) {            
-                return res.status(400).send({ status : false , message: "Enter a Valid title ! " }) 
+                return res.status(400).send({ status : false , message: "Enter A Valid title ! " }) 
             }
-            const checkTitle =await bookModel.findOne({title:title})
+            const checkTitle =await bookModel.findOne({title:title}) 
             if(checkTitle){
                 return res.status(400).send({status: false, message :"Title Already Exist !"}) 
             }
+            updateObj.title = title
         }
         if(ISBN) {
             if(!/^[0-9]{8,15}$/.test(ISBN)){
@@ -101,15 +119,16 @@ const updateBook = async (req, res) => {
             } 
             const isbn=await bookModel.findOne({ISBN:ISBN})
             if(isbn){
-                return res.status(400).send({status: false, message :"ISBN Should be Unique !"}) 
-            } 
+                return res.status(400).send({status: false, message :"ISBN Should be Unique !"})  } 
+        updateObj.ISBN = ISBN
         }
         if(releasedAt){
             if(!checkDate(releasedAt)) {
                 return res.status(400).send({ status : false , message: "Please Enter valid Release-Date Format- /YYYY/MM/DD !" }) }
+            updateObj.releasedAt = releasedAt
             }
 
-        const result = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { $set: req.body }, { new: true })
+        const result = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { $set: updateObj }, { new: true })
         res.status(200).send({ status: true, message: 'Success', data: result })
 
     } catch (err) {
@@ -129,6 +148,5 @@ const deleteBook = async (req, res) => {
         res.status(500).send({ status: false, message: err.message })
     }
 }
-
 
 module.exports = { createBook , getBook , getBookById , deleteBook ,updateBook  } 

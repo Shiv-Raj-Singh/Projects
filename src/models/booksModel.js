@@ -33,7 +33,7 @@ const bookSchema = new mongoose.Schema(
             default:0
         },
         isDeleted:{
-            type:Boolean,
+            type:Boolean, 
             default:false
         },
         deletedAt : {
