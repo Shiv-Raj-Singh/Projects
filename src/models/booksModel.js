@@ -1,49 +1,53 @@
 const { default: mongoose } = require("mongoose");
 const bookSchema = new mongoose.Schema(
     {
-        title :{
-            type:String,
-            unique:true,
-            required : true
+        bookCover: {
+            type: String,
+            required: true
         },
-        excerpt :{
-            type:String,
-            required:true
+        title: {
+            type: String,
+            unique: true,
+            required: true
         },
-        userId : {
-            type : mongoose.Schema.Types.ObjectId,
-            ref : "User",
-            required : true
+        excerpt: {
+            type: String,
+            required: true
         },
-        ISBN :{
-            type:String,
-            required:true,
-            unique:true
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true
         },
-        category:{
-            type:String,
-            required:true
+        ISBN: {
+            type: String,
+            required: true,
+            unique: true
         },
-        subcategory:{
-            type:String,
-            required:true
+        category: {
+            type: String,
+            required: true
         },
-        reviews:{
-            type:Number,
-            default:0
+        subcategory: {
+            type: String,
+            required: true
         },
-        isDeleted:{
-            type:Boolean, 
-            default:false
+        reviews: {
+            type: Number,
+            default: 0
         },
-        deletedAt : {
-            type : Date
+        isDeleted: {
+            type: Boolean,
+            default: false
         },
-        releasedAt:{
-            type:Date,
-            required:true
+        deletedAt: {
+            type: Date
+        },
+        releasedAt: {
+            type: Date,
+            required: true
         }
-    }, {timestamps:true}
+    }, { timestamps: true }
 )
 
-module.exports = mongoose.model("Book",bookSchema)
+module.exports = mongoose.model("Book", bookSchema)

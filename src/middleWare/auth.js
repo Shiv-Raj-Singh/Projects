@@ -2,7 +2,9 @@ const jwt = require("jsonwebtoken")
 const moment = require("moment/moment")
 const bookModel = require('../models/booksModel')
 const reviewModel = require('../models/reviewModel')
-const { isValidName, isValidTitle, isValidPhone, isValidEmail, isValidPass, isValid, isValidBookTitle, isValidObjectIds, checkDate } = require('../validator/valid')
+const { isValidName, isValidTitle, isValidPhone,
+         isValidEmail, isValidPass, isValid,
+         isValidBookTitle, isValidObjectIds, checkDate } = require('../validator/valid')
 
 const userCreateValidation = function (req, res, next) {
 try {
@@ -10,53 +12,40 @@ try {
         return res.status(400).send({ status: false, message: 'No User Data Exist in Body' })
     }
     const { title, name, phone, email, password, address } = req.body
-    if (!isValid(name)) {
-        return res.status(400).send({status: false, message: "Enter User Name" })
+
+    if (!isValidName(name) || !isValid(name)) {
+        return res.status(400).send({status: false, message: "Name Mandatory! && Should be in Alphabets !"})
     }
-    if (!isValidName(name)) {
-        return res.status(400).send({status: false, message: "Name only take alphabets"})
+    if (!isValidTitle(title) || !isValid(title)) {
+        return res.status(400).send({status: false, message: "title Mandatory! && Should be like this ['Mr', 'Mrs', 'Miss'] !" })
     }
-    if (!isValid(title)) {
-        return res.status(400).send({status: false, message: "Enter Title Name" })
+    if (!isValidEmail(email) || !isValid(email)) {
+        return res.status(400).send({ status: false, message: "Email Mandatory! && Should be Valid !" })
     }
-    if (!isValidTitle(title)) {
-        return res.status(400).send({status: false, message: "Enter title from this ['Mr', 'Mrs', 'Miss']" })
+    if (!isValidPass(password) ||!password ){
+         return res.status(400).send({ status: false, message: 'Password Mandatory ! && Should be Valid Contain only 8 to 15 Charactors !' })
     }
-    if (!isValid(email)) {
-        return res.status(400).send({status: false, message: "Enter Email-Id" })
+    if (!isValidPhone(phone) || !phone){
+        return res.status(400).send({status: false, message: "Phone Number Mandatory! && Should be Valid !" })
     }
-    if (!isValidEmail(email)) {
-        return res.status(400).send({ status: false, message: "enter valid email" })
+    if(address && (typeof address !== "object" || Object.keys(address).length == 0  )) {
+        return res.status(400).send({status: false, message: "Address Should be An Object && Not be Empty !" })
     }
-    if (!password) {
-        return res.status(400).send({ status: false, message: 'Password Mandatory !' })
-    }
-    if (password.length < 8 || password.length > 15){
-        return res.status(400).send({ status: false, message: 'Password Must be Contain Min 8 or Max 15 Charactors !' })
-    }
-    if (!isValidPass(password)){
-         return res.status(400).send({ status: false, message: 'inValid Password !' })
-    }
-    if (!phone){
-        return res.status(400).send({status: false, message: "Enter The Phone Number !" })
-    } 
-    if (!isValidPhone(phone)){
-        return res.status(400).send({status: false, message: "Please Enter valid Phone Number !" })
-    } 
     if (address) {
         const { street, city, pincode } = address
-        if (street) {
-            if (!isValidName(street)) {
-                return res.status(400).send({status: false, message: "Please Enter valid Street Name !" })
-            }   }
-        if (city) {
-            if (!isValidName(city)) {
+        if(city){
+            if (!isValidName(street) || !isValidName(city)) {
                 return res.status(400).send({status: false, message: "Please Enter valid City Name !" })
-            } }
-        if (pincode) {
+            }
+        if (street) {
+            if (!isValidName(street) || !isValidName(city)) {
+                return res.status(400).send({status: false, message: "Please Enter valid Street Name !" })
+            }
+        if(pincode)
             if (!/^[0-9]{6}$/.test(pincode)) {
                 return res.status(400).send({ status: false, message: "Please Enter valid Pin-Code !" })
-            } } }
+            }
+           }}}
 
     next()
     }
@@ -72,47 +61,26 @@ const bookCreateValidation = function (req, res, next) {
         console.log(req.body)
         if (Object.keys(req.body).length == 0) return res.status(400).send({ status: false, message: 'No User Data Exist in Body' })
         const { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = req.body
-        if (!isValid(excerpt)) {
-            return res.status(400).send({status: false, msg: "Enter User Excerpts !" })
+        if (!isValidName(excerpt) || !isValid(excerpt)) {
+            return res.status(400).send({status: false, msg: "Excerpt Mandatory! && Should be in Alphabets !" })
         }
-        if (!isValidName(excerpt)) {
-            return res.status(400).send({status: false, msg: "excerpt only take alphabets !" })
+        if (!isValidBookTitle(title) || !isValid(title) ) {
+            return res.status(400).send({ status: false, msg: "Title Mandatory! && Should be Valid ! " })
         }
-        if (!isValid(title)) {
-            return res.status(400).send({ status: false, msg: "Enter Title Name for Book !" })
+        if (!isValidObjectIds(userId) || !userId) {
+            return res.status(400).send({ status: false, msg: "User-Id Mandatory! && Should be Valid !" })
         }
-        if (!isValidBookTitle(title)) {
-            return res.status(400).send({ status: false, msg: "Enter a Valid title ! " })
-        }
-        if (!isValid(userId)) {
-            return res.status(400).send({ status: false, msg: "Enter User-Id !" })
-        }
-        if (!isValidObjectIds(userId)) {
-            return res.status(400).send({ status: false, msg: "enter a Valid User Id !" })
-        }
-        if (!ISBN){
-            return res.status(400).send({ status: false, message: 'ISBN is Mandatory !' })
+        if (!isValidBookTitle(category) || !category){
+            return res.status(400).send({ status: false, msg: "category Mandatory! && Should be Valid  !" })
         } 
-        if (!category){
-            return res.status(400).send({ status: false, msg: "Enter The Category !" })
-        } 
-        if (!isValidBookTitle(category)){
-            return res.status(400).send({ status: false, msg: "Please Enter valid Category !" })
-        } 
-        if (!subcategory){
-            return res.status(400).send({ status: false, msg: "Enter The Sub-Category !" })
-        } 
-        if (!isValidBookTitle(subcategory)) {
-            return res.status(400).send({ status: false, msg: "Please Enter valid Sub-Category !" })
+        if (!isValidBookTitle(subcategory || !subcategory)) {
+            return res.status(400).send({ status: false, msg: "Sub-Category Mandatory! && Should be Valid !" })
         }    
-        if (!ISBN){
-            return res.status(400).send({ status: false, msg: "Please Enter ISBN Number !" })
-        } 
-        if (!/^[0-9]{8,15}$/.test(ISBN)) {
-            return res.status(400).send({ status: false, msg: "Please Enter valid ISBN Number !" })
+        if (!/^[0-9]{8,15}$/.test(ISBN) || !ISBN) {
+            return res.status(400).send({ status: false, msg: "ISBN NUmber Mandatory! && Should be Valid !" })
         }
-        if (!checkDate(releasedAt)) {
-            return res.status(400).send({ status: false, msg: "Please Enter valid Release-Date Format- /YYYY/MM/DD !" })
+        if (!checkDate(releasedAt) || !releasedAt) {
+            return res.status(400).send({ status: false, msg: "ReleasedAt Mandatory ! && Should be like this-[ YYYY-MM-DD ] !" })
         }
    next()
     }
@@ -153,11 +121,9 @@ try {
 const autherisation = async (req, res, next) => {
     try {
         const bookId = req.params.bookId;
-        if (!isValid(bookId)) {
-            return res.status(400).send({ status: false, message: "Enter book Id" })
-        }
-        if (!isValidObjectIds(bookId)) {
-            return res.status(400).send({ status: false, message: "Enter Valid book Id" })
+
+        if (!isValidObjectIds(bookId) || !bookId) {
+            return res.status(400).send({ status: false, message: "Book-Id Mandatory! && Should be Valid " })
         }
         const user = await bookModel.findById(bookId)
         if (!user){
@@ -178,7 +144,7 @@ const autherisation = async (req, res, next) => {
 }
 
 
-// ********************************* Review Create ***************************************
+// *******    *** **** **   ***************** Review Create *******     *******    *******   ********     **********
 
 const reviewCreateValidation = function(req , res , next ){
     try {
@@ -193,22 +159,19 @@ const reviewCreateValidation = function(req , res , next ){
 
         if(reviewedBy){
             if (!isValidName(reviewedBy) || !isValid(reviewedBy)) {
-                return res.status(400).send({status: false, message: "ReviewedBy Name Should be alphabets !" })
+                return res.status(400).send({status: false, message: "ReviewedBy Name Should be Alphabets !" })
             }
         }else{
             req.body.reviewedBy = 'Guest'
         }
         if(reviewedAt){
-            if (!checkDate(releasedAt) || !isValid(reviewedAt)) {
-                return res.status(400).send({ status: false, message: "Please Enter valid Release-Date Format- /YYYY/MM/DD !" }) }
+            if (!checkDate(reviewedAt) || !isValid(reviewedAt)) {
+                return res.status(400).send({ status: false, message: "reviewedAt Should be like this-[ YYYY-MM-DD ]!" }) }
         }else{
             req.body.reviewedAt = moment().format('YYYY-MM-DD')
         }
-        if(!rating || !isValid(rating)){
-            return res.status(400).send({status: false, message: "Rating Mandatory or Not be 0 !" })
-        }
-        if(!/^[1-5]{1}$/.test(rating)){
-            return res.status(400).send({status: false, message: "Rating Should be Valid btw { 1 to 5 } only -!" })
+        if(!rating || !isValid(rating) || !/^[1-5]{1}$/.test(rating) ){
+            return res.status(400).send({status: false, message: "Rating Mandatory ! && Not be 0 ! && Should be Valid btw { 1 to 5 } !" })
         }
         if(review){
             if(!isValid(review) || !isValidBookTitle(review)){
@@ -222,13 +185,17 @@ const reviewCreateValidation = function(req , res , next ){
     }
 }
 
+// ******************************************** *  Update & Deelete Review ****    ***     **    ***    ******* 
+
 const putDeeleteReview =  async (req,res ,next)=>{
     try {
         const bookId = req.params.bookId;
         if (!isValidObjectIds(bookId)) {
             return res.status(400).send({ status: false, message: "Enter Valid book Id" })
         }
-        const bookData = await bookModel.findById(bookId).lean()
+        const bookData = await bookModel.findById(bookId).select({__v:0 , createdAt:0 ,updatedAt:0 , subcategory:0})
+        console.log(bookData.releasedAt)
+        const bookRealeaseDate = bookData.releasedAt
         if(!bookData){
             return res.status(404).send({ status: false , msg: 'Books not found !'})
         }
@@ -239,17 +206,20 @@ const putDeeleteReview =  async (req,res ,next)=>{
         if (!isValidObjectIds(bookId)) {
             return res.status(400).send({ status: false, message: "Enter Valid book Id" })
         }
-        const reviewsData = await reviewModel.findById(reviewId).lean()
+        const reviewsData = await reviewModel.findById(reviewId)
+        if(reviewsData.bookId.toString()  !==bookId){
+            return res.status(404).send({ status: false , msg: 'Book-id is not match by review bookid !'})
+        }
         if(!reviewsData){
-            return res.status(404).send({ status: false , msg: 'no review found !'})
+            return res.status(404).send({ status: false , msg: 'No review found !'})
         }
         if(reviewsData.isDeleted!==false){
-            return res.status(404).send({ status: false , msg: 'review is Already Deleted !'})
+            return res.status(404).send({ status: false , msg: 'Review is Already Deleted !'})
         }
-        
-        req.body.bookData = bookData
-        console.log(bookData) , req.Body
-        req.body.reviewsData = reviewsData
+       
+        req.bookData = bookData
+        req.reviewsData = reviewsData
+        req.bookRealeaseDate = bookRealeaseDate
 
     next()
 

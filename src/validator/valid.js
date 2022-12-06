@@ -3,7 +3,7 @@ const {isValidObjectId} = require("mongoose")
 // validation for name 
 
 const isValidName =function(name){
-    const  nameRegex =/^[a-zA-Z( \)]{2,20}$/
+    const  nameRegex =/^[a-zA-Z( \)]{2,50}$/
     return nameRegex.test(name)
 }
 
@@ -31,7 +31,7 @@ const isValidEmail = function(email){
 
 
 const isValidPass= (value)=>{
-    const passRegex = /^[a-zA-Z0-9@$]*$/
+    const passRegex = /^[a-zA-Z0-9@$]{8,15}$/
     return passRegex.test(value)
 }
 
@@ -58,7 +58,7 @@ const isValid = function(value){
        
 // Each Field has to Valid Means String and Number only not special Charactors
 const isValidBookTitle = function(title){
-    const bTitleregex = /^[A-Za-z0-9( \)]*$/
+    const bTitleregex = /^[A-Za-z0-9(\)( \)]*$/
     return bTitleregex.test(title)
 }
 function checkDate(str) {     // 2022 - 11 - 29
@@ -67,4 +67,5 @@ function checkDate(str) {     // 2022 - 11 - 29
 }
 
 
-module.exports = { isValidName, isValidTitle,isValidPhone, isValidEmail,isValidPass, isValidObjectIds, isBoolean, isValid ,isValidBookTitle , checkDate}
+module.exports = { isValidName, isValidTitle,isValidPhone, isValidEmail,isValidPass, isValidObjectIds,
+     isBoolean, isValid ,isValidBookTitle , checkDate}
