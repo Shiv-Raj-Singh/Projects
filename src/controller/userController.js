@@ -28,6 +28,7 @@ const createUser = async (req, res) => {
 const userLogin = async (req, res) => {
 try {
     const {email , password} = req.body
+    console.log(req.body)
 
     if (!isValidEmail(email) || !isValid(email)) {
         return res.status(400).send(ErrorHandler(false , "Email Mandatory! && Should be Valid !" ))

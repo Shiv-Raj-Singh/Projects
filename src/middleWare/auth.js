@@ -6,6 +6,17 @@ const { isValidName, isValidTitle, isValidPhone,
          isValidEmail, isValidPass, isValid,
          isValidBookTitle, isValidObjectIds, checkDate } = require('../validator/valid')
 
+const {fileUpload} = require("../middleWare/awsfileUpload")
+
+// const awsfileUpload = (req , res ){
+//     const files = req.files
+//     if(!files) return res.status(404).send({status :false , message : "files Must be Present !"})
+//     const url = await fileUpload(files)
+//     req.body.bookCover = url 
+//     console.log(url)
+  
+// }
+
 const userCreateValidation = function (req, res, next) {
 try {
     if (Object.keys(req.body).length == 0){
@@ -56,11 +67,19 @@ try {
 
 //  **********************************************************  Book Creation  Validation *****************
 
-const bookCreateValidation = function (req, res, next) {
+const bookCreateValidation = async function (req, res, next) {
     try {
-        console.log(req.body)
+        // console.log(req.body)
         if (Object.keys(req.body).length == 0) return res.status(400).send({ status: false, message: 'No User Data Exist in Body' })
         const { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = req.body
+
+        const files = req.files
+        if(!files) return res.status(404).send({status :false , message : "files Must be Present !"})
+        // console.log(req.files)
+        const url =  await fileUpload(files[0])
+
+        req.body.bookCover = url 
+
         if (!isValidName(excerpt) || !isValid(excerpt)) {
             return res.status(400).send({status: false, msg: "Excerpt Mandatory! && Should be in Alphabets !" })
         }

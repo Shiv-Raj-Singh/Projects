@@ -5,8 +5,7 @@ const routes = require('./route/route')
 const app = express()
 const multer = require('multer')
 
-// app.use(express.json())
-
+app.use(express.json())
 app.use(multer().any())
 mongoose.connect("mongodb+srv://bloggingSite:project123@project-01-group-3.2zpxn0w.mongodb.net/Project-03-Books-Management-Systems",{
     useNewUrlParser:true
