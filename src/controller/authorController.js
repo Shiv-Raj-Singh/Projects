@@ -44,7 +44,7 @@ export const loginAuthor = (req , res )=>{
            return jwt.sign(payload , "Shiv Raj Singh" ,{expiresIn:"24h"})
         }).then(token =>{
             res.setHeader("x-api-key", token)
-            return res.status(201).send(new Response(true  , token )) 
+            return res.status(201).send(new Response(true  , {token : token} )) 
         }).catch((err)=>{
             if(err.isJoi==true){
                 return res.status(400).json(new Response(false , err.message))

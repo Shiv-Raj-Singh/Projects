@@ -34,4 +34,4 @@ const blogSchema=new Schema({
     deletedAt:String
 },{timestamps:true})
 
-export const authorModel = model('Blog',blogSchema)
+export const blogModel = model('Blog',blogSchema)
