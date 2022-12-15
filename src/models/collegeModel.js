@@ -4,7 +4,7 @@ const collegeSchema = new Schema({
     name: {
         type: String,
         required: [true , "Please enter A College Name !"],
-        Unique:  [true , `Name Already Exist !`],
+        Unique:  true,
         lowercase : true,
         trim : true ,
         match : [/^[a-zA-Z]{3,30}$/ , "College Name Should be A string Min 3 Length !"],
@@ -14,15 +14,16 @@ const collegeSchema = new Schema({
         type: String,
         required: [true , "Please enter A College Full-Name !"],
         trim : true ,
-        match : [/^[a-zA-Z( \)]{5,20}$/ , " Name Should be A string Min 3 Length !"],
-        Unique: [true , `fullName is Already Exist !`]
+        match : [/^[a-zA-Z( \)]{3,20}$/ , "Name Should be A string Min 3 Length !"],
+        Unique: true
     },
     logoLink: {
         type: String,
         required: [true , "Please enter A College Logolink !"],
+        Unique:true
     },
     isDeleted: {
-        type: [Boolean , "Please enter A Boolean Value !"],
+        type: Boolean ,
         default: false
     }
 },

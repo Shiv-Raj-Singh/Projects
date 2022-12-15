@@ -9,7 +9,6 @@ export class ErrorHandler extends Error {
 
 export class SuccessResonse {
     constructor(data){
-        // this.success = successFul
         this.status = true
         this.data = data
     }
