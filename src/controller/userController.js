@@ -1,55 +1,33 @@
 const userModel = require("../models/userModel")
 const jwt = require("jsonwebtoken")
-const {isValidEmail,isValidPass , isValid} = require('../validator/valid')
 const {ErrorHandler} = require('../validator/ErrorValidation')
+const { userSchema , loginSchema} = require("../models/joiSchema")
+const { catchAsyncController } = require("./catchController")
 
-const createUser = async (req, res) => {
-    try {
-        const {phone , email } = req.body
-        const findData = await userModel.find({$or:[{phone : phone} ,{ email :email} ]})
 
-        for ( let a =0 ; a < findData.length ; a++){
-            console.log(a)
-            if(findData[a].email == email){
-                return res.status(400).send(ErrorHandler(false , "Email Already Registered !" ))
-            } else if(findData[a].phone == phone){
-                return res.status(400).send(ErrorHandler(false , "phone Already Registered  !" ))
-            }
-        }
-        const result = await userModel.create(req.body)
+// ************************************************ Usere Register *************************************
 
-        return res.status(201).send({ status: true, message: 'Success', data: result })
-        
-    } catch (err) {
-        res.status(500).send({ status: false, message: err.message })
-    }
-}
+const createUser = catchAsyncController(async (req , res , next)=>{
+    const userData = await userSchema.validateAsync(req.body)
+    const result = await userModel.create(userData)
+    return res.status(201).send({ status: true, message: 'Success', data: result })
+})
 
-const userLogin = async (req, res) => {
-try {
-    const {email , password} = req.body
-    console.log(req.body)
 
-    if (!isValidEmail(email) || !isValid(email)) {
-        return res.status(400).send(ErrorHandler(false , "Email Mandatory! && Should be Valid !" ))
-    }
-    if (!isValidPass(password) ||!password ){
-        return res.status(400).send(ErrorHandler(false , "'Password Mandatory ! && Should be Valid Contain only 8 to 15 Charactors !" ))
-   }
-    const userData = await userModel.findOne({ email: email })
-    if(!userData){
-        return res.status(404).send({status:false , message : ' User Not Found !'})
-    } 
-    if(userData.password !== password){
-        return res.status(404).send({status:false , message : 'Incorrect Password !'})
-    } 
+// **************************************************  Login User **************************************
+
+const userLogin = catchAsyncController( async (req ,res , next)=>{
+    const loginData = await loginSchema.validateAsync(req.body)
+    const userData = await userModel.findOne({ email: loginData.email })
+
+    if(!userData)  return next(new ErrorHandler(`User Not Found !` , 404))
+    if(userData.password !== loginData.password) return next( new ErrorHandler('Incorrect Password !' , 400))
+
     const token = jwt.sign({ userId: userData._id }, "book management", {expiresIn:"24h"})
     const {iat , exp} = jwt.verify(token , "book management")
 
     return res.status(200).send({ status: true, message: 'Success', data: token , iat : new Date(iat) , exp : new Date(exp) })
 
-    } catch (err) {
-        res.status(500).send({ status: false, message: err.message })
-    }
-}
+})
+
 module.exports = { createUser, userLogin }

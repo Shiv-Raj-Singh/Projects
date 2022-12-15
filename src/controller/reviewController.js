@@ -1,108 +1,63 @@
 const reviewModel = require("../models/reviewModel")
 const bookModel = require("../models/booksModel")
-const {isValid , isValidName , isValidBookTitle , checkDate} = require('../validator/valid')
 const moment = require('moment')
-const { json } = require("express")
+const { catchAsyncController } = require("./catchController")
+const { isValidObjectId } = require("mongoose")
+const { reviewSchema, updatereviewSchema } = require("../models/joiSchema")
+const { ErrorHandler } = require("../validator/ErrorValidation")
 
-const createReview = async (req, res) => {
-    try {       
-        const bookId = req.params.bookId;
-        req.body.bookId = bookId
-        const bookData = await bookModel.findById(bookId).select({__v:0 , createdAt:0 ,updatedAt:0 , subcategory:0 })
-        console.log(bookData)
+// ***************************************  Review Create ***********************************
 
-        if(!bookData){
-            return res.status(404).send({ status: false , msg: 'Books not found !'})
-        }
-        if(bookData.isDeleted!==false){
-            return res.status(404).send({ status: false , msg: 'Book Deleted  !'})
-        }
 
-        const bookRealeaseDate = new Date(bookData.releasedAt)
-        const reviewRealeaseDate = new Date(req.body.reviewedAt)  
+const createReview = catchAsyncController(async (req ,res , next )=>{
+    const bookId = req.params.bookId;
+    if(Object.keys(req.body).length < 1) next (new ErrorHandler(`No Such Data for review Updation !` , 400))
+    if( !isValidObjectId(bookId)) next (new ErrorHandler(`Enter A Valid Book-Id ${bookId} !` , 400))
 
-        if(reviewRealeaseDate < bookRealeaseDate) return res.status(400).send({ status: false , msg: 'Book Not Released Yet !'})           
+    const bookData = await bookModel.findOne({_id : bookId , isDeleted : false}).select({__v:0 , createdAt:0 ,updatedAt:0 , subcategory:0 })
+    if(!bookData)  next (new ErrorHandler(`No Book found by id !` , 404))
+    req.body.bookId = bookId
+
+    const reviewData = await reviewSchema.validateAsync(req.body)   // Validation For Review Data 
+
+    const bookRealeaseDate = new Date(bookData.releasedAt)
+    const reviewRealeaseDate = new Date(reviewData.reviewedAt)  
+
+    if(reviewRealeaseDate < bookRealeaseDate) return next (new ErrorHandler(`Book Not Released Yet !` , 400))  
+    const reviewsData = await reviewModel.create(req.body)
+    console.log(bookData.reviews)
+    bookData.reviews++
+    bookData.save()
+   
+    const obj = bookData._doc
+    obj.reviewsData =reviewsData
+    console.log(bookData)
         
-        const reviewsData = await reviewModel.create(req.body)
+    res.status(201).send({ status: true, message: 'Success', data:  obj})
+})
 
-        bookData.reviews++
-        bookData.save()
-        const obj = bookData._doc
-        obj.reviewsData =reviewsData
-        
-        res.status(200).send({ status: true, message: 'Success', data:  obj})
-    } catch (err) {
-        res.status(500).send({ status: false, message: err.message })
-    }
-}
 
-// ******************************************************** Update Review *******************************************************************
+// ******************************************************** Update Review **************************************
 
-const updateReview = async (req, res) => {
+const updateReview = catchAsyncController(async (req ,res ,next)=>{
+    if(Object.keys(req.body).length < 1) next (new ErrorHandler(`No Such Data for review Updation !` , 400))
+    const reviewUpdateData = await updatereviewSchema.validateAsync(req.body)
+    if(!reviewUpdateData.reviewedAt) reviewUpdateData.reviewedAt = moment().format('YYYY-MM-DD')
+    const updateData = await reviewModel.findByIdAndUpdate(req.reviewId  , {$set :reviewUpdateData} , {new : true })
+    res.status(200).send({ status: true, message: 'Success', data: updateData })
+})
 
-    try {
-        const reviewId = req.params.reviewId;
-        const {reviewsData , bookRealeaseDate} = req
 
-        if(Object.keys(req.body).length==0){
-            return res.status(400).send({ status: false, message: 'No Review Data Exist in Body for Update !' })
-        }
-        const  {reviewedBy ,reviewedAt, rating , review }  = req.body
+// **********************************         DElete Review  *** *************       **************
 
-        if(reviewedBy || reviewedBy=='' ){
-            if (!isValidName(reviewedBy) || !isValid(reviewedBy)) {
-                return res.status(400).send({status: false, message: "ReviewedBy Name Should be alphabets !" })
-            }
-        reviewsData.reviewedBy = reviewedBy
-        }
-        if(reviewedAt || reviewedAt==''){
-            if (!checkDate(reviewedAt) || !isValid(reviewedAt)) {
-                return res.status(400).send({ status: false, message: "Please Enter valid Release-Date Format- /YYYY/MM/DD !" }) }
-            if(bookRealeaseDate < new Date(reviewedAt)){
-                return res.status(400).send({ status: false , msg: 'More than Reviewed Date to Book Released Date !'})
-            }
-           data.reviewedAt = reviewedAt
-        }else{
-        reviewsData.reviewedAt = moment().format('YYYY-MM-DD')
-        }
-        if(rating || rating==''){
-            if(!/^[1-5]{1}$/.test(rating)){
-               return res.status(400).send({status: false, message: " Mandotory Ratting Should be Valid btw { 1 to 5 } only -!" })
-            }
-        reviewsData.rating = rating    
-        }
-        if(review || review == ''){
-            if(!isValid(review) || !isValidBookTitle(review)){
-                return res.status(400).send({status: false, message: "inValid review !" })
-            }
-        reviewsData.review = review 
-        }
-        reviewsData.save()
-
-        res.status(200).send({ status: true, message: 'Success', data: reviewsData })
-    } catch (err) {
-        res.status(500).send({ status: false, message: err.message })
-    }
-}
-
-// *************************************************************** DElete Review  *****************
-
-const deleteReview = async (req, res) => {
-    try {
-
-        const {bookData ,reviewsData} = req
-        bookData.reviews--
-        reviewsData.isDeleted = true
-        bookData.save()
-        reviewsData.save()
-
-    res.status(200).send({ status: true, message: 'Success', data: 'Review Deleted Succesfully !' })
-
-    } catch (err) {
-        res.status(500).send({ status: false, message: err.message })
-    }
-}
-
+const deleteReview = catchAsyncController(async (req ,res )=>{
+    const {bookData ,reviewsData} = req
+    bookData.reviews--
+    reviewsData.isDeleted = true
+    bookData.save()
+    reviewsData.save()
+    res.status(200).send({ status: true, message: 'Success', data: 'Review Deleted Succesfully !' })   
+})
 
 module.exports = { createReview, updateReview, deleteReview }
 

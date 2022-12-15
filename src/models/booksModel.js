@@ -1,10 +1,11 @@
 const { default: mongoose } = require("mongoose");
+
 const bookSchema = new mongoose.Schema(
     {
-        bookCover: {
-            type: String,
-            required: true
-        },
+        // bookCover: {
+        //     type: String,
+        //     required: true
+        // },
         title: {
             type: String,
             unique: true,

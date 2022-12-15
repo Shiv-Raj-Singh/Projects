@@ -12,7 +12,6 @@ const reviewSchema = new mongoose.Schema(
             required:true,
             default:"Guest",
             trim:true
-            //value: reviewer's name
         },
         reviewedAt:{
             type:Date,
