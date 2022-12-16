@@ -6,7 +6,7 @@ const internSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true , "Name Should be Required !"] ,
-      match : [/^[a-zA-Z( \)]{3,30}$/ , " Name Should be A string Min 3 Length !"]
+      match : [/^[a-zA-Z( \)]*$/ , " Name Should be A Alphabate Min 3 or Max 25 !"]
     },
     email: {
       type: String,

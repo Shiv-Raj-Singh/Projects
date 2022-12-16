@@ -7,14 +7,14 @@ const collegeSchema = new Schema({
         Unique:  true,
         lowercase : true,
         trim : true ,
-        match : [/^[a-zA-Z]{3,30}$/ , "College Name Should be A string Min 3 Length !"],
+        match : [/^[a-zA-Z( \)]{3,30}$/ , "College Name Should be A string Min 3 Length !"],
         
     },
     fullName: {
         type: String,
         required: [true , "Please enter A College Full-Name !"],
         trim : true ,
-        match : [/^[a-zA-Z( \)]{3,20}$/ , "Name Should be A string Min 3 Length !"],
+        match : [/^[a-zA-Z( \)]{3,30}$/ , "Full Name Should be A string Min 3 Length And Max 30 !"],
         Unique: true
     },
     logoLink: {

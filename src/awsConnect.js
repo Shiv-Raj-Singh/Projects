@@ -8,7 +8,7 @@ aws.config.update({
 
 export const uploadFile = function(file){
     return new Promise((resolve , reject)=>{
-
+        
         const s3= new aws.S3({apiVersion: '2006-03-01'}); 
 
         const uploadParams = {
@@ -19,32 +19,8 @@ export const uploadFile = function(file){
         }
 
         s3.upload(uploadParams , (err , data )=>{
-            if(err) return reject(err)
+            if(err) return reject(err.message)
             return resolve(data.Location)
         })
     })
 }
-
-
-
-
-
-// export const uploadFile = (file) => {
-//   return new Promise((resolve, reject) => {
-//     const s3 = new aws.S3({ apiVersion: '2006-03-01' });
-
-//     const uploadParams = {
-//       ACL: 'public-read',
-//       Bucket: 'shivraj-demo-s3',
-//       Key: 'shivraj/' + file.originalname,
-//       Body: file.buffer,
-//     };
-//     s3.upload(uploadParams, (err, data) => {
-//       if (err) {
-//         console.log(err);
-//         return reject({ error: err });
-//       }
-//       return resolve(data.Location);
-//     });
-//   });
-// };

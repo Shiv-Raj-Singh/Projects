@@ -5,20 +5,21 @@ export const globalerrorHandler = (err , req , res , next )=>{
 
     if(err.name == "ValidationError"){
         err.message = err.message
-        err.statusCode = 400
+        err.statusCode  = 400
+        const keys = err.errors
+        const error = Object.values(keys)
+        if(error.length > 0 ){
+            err.message = error[0].message
+        }
     }
-    if(err.code == "11000"){
-        if(err.keyValue.email){
-            err.statusCode = 400
-            err.message = ` email ${err.keyValue.email}  Already Exist !`
-        }
-        if(err.keyValue.mobile){
-            err.statusCode = 400
-            err.message = `Mobile Number ${err.keyValue.mobile}  Already Exist !`
-        }
 
+    if(err.code == "11000"){
         err.statusCode = 400
-        err.message = `${err.keyValue} Already Exist !`
+        const values = Object.keys(err.keyValue)
+        console.log(values)
+        for (let i of values){
+            err.message = `Duplicate Key Error For ${i} !`
+        }
     }
  
    res.status(err.statusCode).json({
